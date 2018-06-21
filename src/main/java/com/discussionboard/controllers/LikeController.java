@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,7 +67,7 @@ public class LikeController {
 		return l ;
     }
 	
-	
+	// adds like to a topic by user
 	@PostMapping (path="{userId}/addLike/{topicId}")
 	public @ResponseBody Likes addUserLikes(@PathVariable(value ="userId") long userId,@PathVariable(value ="topicId") long topicId) {
 		Optional<User> user = userRepository.findById(userId);
@@ -77,10 +78,11 @@ public class LikeController {
 		if(user.isPresent()) {
 			u = user.get();
 			if (topic.isPresent()) {
-				t = topic.get();
+				t = topic.get();				
 				l.setTopic(t);
-				t.getLikes().add(l);
-			    t.setUser(u);
+				l.setUser(u);				
+				t.setUser(u);
+				u.getLikes().add(l); 
 		userRepository.save(u);
 	
 			}		
@@ -89,21 +91,42 @@ public class LikeController {
 		
 	}
 
+  // gets the topics likes by user by taking userId and topicId
 	
-	
-	@PostMapping (path= "{topicId}/getLikes")
-	public @ResponseBody List<Likes> getLikesByTopic(@PathVariable(value="topicId") long topicId) {
-		Optional<Topic> t = topicRepository.findById(topicId);
-		List<Likes> likes = null;
-		if (t.isPresent()) {
-			likes = t.get().getLikes();
-//		likes = likeRepository.likesById(topicId);
-		System.out.println("likes count = " + likes.size());
+	@PostMapping(path="/{userId}/topicsByUserLikes")
+	public @ResponseBody List<Likes> getTopcisByUserLike(@PathVariable(value="userId") long userId) {
+		
+		Optional<User> user = userRepository.findById(userId);
+		//Optional<Topic> topic = topicRepository.findById(topicId);
+		User u = null;
+		List<Topic> t = null;
+		List<Likes> l = null;
+		if(user.isPresent()) {
+			u = user.get();
+			l = u.getLikes();
 			
 		}
-		return likes;
-	}	
+			
+		return l;
+	}
 	
+	// Delete a like by querying like by userId and topicId
+	@PostMapping(path="{userId}/deletelike/{topicId}")
+	public @ResponseBody Likes deleteLikebyId(@PathVariable(value="userId") long userId, @PathVariable(value="topicId") long topicId) {
+//		Optional <User> user = userRepository.findById(userId);
+//		Optional <Topic> topic = topicRepository.findById(topicId);
+//		User u = null;
+//		Topic t = null;
+//		if(user.isPresent()) {
+//			user.get();
+//			
+//		}
+		likeRepository.deleteByUserAndTopic(topicId, userId);
+		
+		
+		
+		return null;
+	}
 	
 	
 }

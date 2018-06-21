@@ -15,5 +15,5 @@ public interface TopicRepository extends CrudRepository<Topic, Long> {
 	
 //	void save(Reply r);
 	Topic save(Topic topic);
-	
-}
+	 public List<Topic> findAllByOrderByIdDesc();
+	}

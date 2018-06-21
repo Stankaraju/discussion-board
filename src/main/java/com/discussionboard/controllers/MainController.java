@@ -1,7 +1,13 @@
 package com.discussionboard.controllers;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -11,15 +17,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.discussionboard.Document;
 import com.discussionboard.Reply;
 import com.discussionboard.Topic;
 import com.discussionboard.User;
+import com.discussionboard.repositories.DocumentRepository;
 import com.discussionboard.repositories.ReplyRepository;
 import com.discussionboard.repositories.TopicRepository;
 import com.discussionboard.repositories.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -31,12 +43,21 @@ public class MainController {
 			private ReplyRepository replyRepository;
 			@Autowired
 			private UserRepository userRepository;
+			@Autowired
+			private DocumentRepository documentRepository;
 			
 			/**             ******** TOPIC SERVICES *********           */
 			
 			// adding a topic
-			@PostMapping(path="/add")
-			public @ResponseBody Topic addNewTopic (@RequestBody Topic t) {
+			@PostMapping(path="/add/{userId}")
+			public @ResponseBody Topic addNewTopic (@RequestBody Topic t, @PathVariable (value="userId") long userId) {
+				Optional<User> user = userRepository.findById(userId);
+				User u = null;
+				if(user.isPresent()) {
+					u = user.get();
+					t.setUser(u);
+				}
+				
 				topicRepository.save(t);
 				return topicRepository.save(t);
 			}
@@ -45,10 +66,14 @@ public class MainController {
 			@PutMapping(path="/update")
 			public @ResponseBody Topic updateTopic(@RequestBody Topic t) {
 				Optional<Topic> topic = topicRepository.findById(t.getId());
+				List<Document> document = documentRepository.findByTopicId(t.getId());
 				if(topic.isPresent()) {
 					topic.get().settName(t.gettName());
 					topic.get().setTdescription(t.getTdescription());
-				}			
+					topic.get().setDocuments(document);
+					
+					
+					}			
 				return topicRepository.save(topic.get());
 			}
 			
@@ -72,6 +97,12 @@ public class MainController {
 				return topicRepository.findAll();
 			}
 			
+			@GetMapping(path = "/desOrderAll")
+			public @ResponseBody Iterable<Topic> getAllTopicsbydesc(){
+				return topicRepository.findAllByOrderByIdDesc();
+			}
+			
+			
 			@GetMapping(path = "/noOfTopics")
 			public @ResponseBody long noOfTopics(){
 				long r = topicRepository.count();
@@ -85,19 +116,55 @@ public class MainController {
 				return topicRepository.findById(id);
 			}
 			
-      // ADD TOPICS BY USER ID....
-			@PostMapping (path="{userId}/add/topic")
-			public @ResponseBody  User addNewTopicByUserId(@PathVariable(value="userId") long userId, @RequestBody Topic t){
-			Optional<User> user = userRepository.findById(userId);
-			User u = null;
-		    if(user.isPresent()) {
-		    	u = user.get();
-		    	t.setUser(u);
-		    	u.getTopics().add(t);
-		    	userRepository.save(u); 
-		    } 
-				return u;
-		    }
+			
+			
+			
+           // creates a new topic with a file/files attached...
+//			@RequestMapping (path="{userId}/add/topic")
+//			public @ResponseBody  Topic addNewTopicByUserId(@PathVariable(value="userId") long userId, @RequestPart("topic") String t,
+//					HttpServletRequest request,	@RequestParam("files") MultipartFile[] files) throws IOException {
+//				ObjectMapper objectMapper = new ObjectMapper();
+//				Topic topic = objectMapper.readValue(t.getBytes(), Topic.class);
+//				
+//				Optional<User> user = userRepository.findById(userId);
+//				User u = null;
+//				if(user.isPresent()) {
+//					u = user.get();
+//					topic.setUser(u);
+//				}
+//				
+//				List<Document> documentList=new ArrayList<>();
+//				for(MultipartFile file : files) {
+//					byte[] content = file.getBytes();
+//					Document backImg= new Document();
+//					backImg.setName(file.getOriginalFilename());
+//					backImg.setType(file.getContentType());
+//					backImg.setContent(content);
+//					backImg.setTopic(topic);
+//					documentList.add(backImg);
+//					
+//				}
+//				topic.setDocuments(documentList);
+//				
+//				topicRepository.save(topic);
+//		   
+//				return topic;
+//		    }
+
+			
+			//get all topics created by a user..
+			@PostMapping(path="{userId}/userTopics")
+			public @ResponseBody List<Topic> userTopics(@PathVariable(name="userId") long userId) {
+				Optional<User> user = userRepository.findById(userId);
+				User u = null;
+				List <Topic> t = null;
+				if(user.isPresent()) {
+					u = user.get();
+					t = u.getTopics();
+					
+				}	
+				return t;
+			}
 
 			
 			/**             ******** REPLY SERVICES *********           */
@@ -181,21 +248,17 @@ public class MainController {
 				return topics;
 			}	
 			
-//			@PostMapping (path= "{userId}/getTopics/{topicId}")
-//			public @ResponseBody List<Topic> getTopicByUserId(@PathVariable(value="userId") long userId, @PathVariable(value="topicId") long topicId) {
-//				Optional<User> u = userRepository.findById(userId);
-//	
-//				List<Topic> topics = null;
-//				Optional<Topic> t = null;
-//				
-//				if (u.isPresent()) {
-//					topics = u.get().getTopics();
-//					
-//				}
-//				
-//				return topics;
-//			}	
-//		
+        // get user comments
+			@GetMapping(path="/getUserComments/{commentedBy}")
+			public @ResponseBody Set<Topic> getRepliesByUser(@PathVariable(value="commentedBy") String commentedBy){
+				List<Reply> r= replyRepository.findByCommentedBy(commentedBy);
+				Set<Topic> t = new HashSet<>();
+				for(Reply reply:r) {
+					Topic topic= reply.getTopic();
+					t.add(topic);
+				}	
+				return t;
+			}
 			/**             ******** USER SERVICES *********           */
 			
 			//adding a user

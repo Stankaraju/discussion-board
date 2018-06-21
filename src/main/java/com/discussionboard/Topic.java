@@ -22,11 +22,13 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="Topic")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Topic {
 	
 	@Id
@@ -35,16 +37,14 @@ public class Topic {
 	private String tName;
 	private String tdescription;
 	private String createdBy;
-
-	
-	
-	
+  // **** relation to replies ****//
 	@OneToMany (cascade = CascadeType.ALL,
 			    fetch = FetchType.LAZY,
 			    mappedBy="topic")
 	
-	private List <Reply> replies;
+	private List <Reply> replies; 
 	
+   //*** relation to likes*****//
 	@OneToMany (cascade = CascadeType.ALL,
 		    fetch = FetchType.LAZY,
 		    mappedBy="topic")
@@ -57,6 +57,15 @@ public class Topic {
 	public void setLikes(List<Likes> likes) {
 		this.likes = likes;
 	}
+	
+	//**** relation to documents ****//
+	@OneToMany(cascade = CascadeType.ALL,
+			fetch = FetchType.LAZY,
+			mappedBy="topic")
+	
+	private List<Document> documents;
+	
+	// ****relation to users ****//
 	@JsonIgnore
 	@ManyToOne(fetch= FetchType.LAZY)
 	@JoinColumn(name="user_id")
@@ -112,5 +121,11 @@ public class Topic {
 	}
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
+	}
+	public List<Document> getDocuments() {
+		return documents;
+	}
+	public void setDocuments(List<Document> documents) {
+		this.documents = documents;
 	}
 }

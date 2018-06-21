@@ -1,22 +1,17 @@
 package com.discussionboard.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 import com.discussionboard.Likes;
+import com.discussionboard.Topic;
+import com.discussionboard.User;
 
 public interface LikeRepository extends CrudRepository< Likes, Long> {
 
-
-	
-
 	void save(long l);
+	void deleteByUserAndTopic(long userId, long topicId);
 	
-//	@Query("select count(likes) from Likes as l where l.topic_id = :id") 
-//	 public List<Likes> likesById (@Param(value = "topic_id") long topic_id);
-	
- 
 }

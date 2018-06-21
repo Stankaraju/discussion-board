@@ -47,9 +47,8 @@ public  class User implements UserDetails {
 		    fetch = FetchType.LAZY,
 		    mappedBy="user")
 
-private List <Likes> likes;
-
-
+    private List <Likes> likes;
+	
 	public List<Likes> getLikes() {
 		return likes;
 	}
