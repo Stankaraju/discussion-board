@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
+import com.discussionboard.Reply;
 import com.discussionboard.Topic;
 
 
@@ -16,4 +17,5 @@ public interface TopicRepository extends CrudRepository<Topic, Long> {
 //	void save(Reply r);
 	Topic save(Topic topic);
 	 public List<Topic> findAllByOrderByIdDesc();
+	
 	}

@@ -81,7 +81,7 @@ public class LikeController {
 				t = topic.get();				
 				l.setTopic(t);
 				l.setUser(u);				
-				t.setUser(u);
+				//t.setUser(u);
 				u.getLikes().add(l); 
 		userRepository.save(u);
 	
@@ -112,21 +112,19 @@ public class LikeController {
 	
 	// Delete a like by querying like by userId and topicId
 	@PostMapping(path="{userId}/deletelike/{topicId}")
-	public @ResponseBody Likes deleteLikebyId(@PathVariable(value="userId") long userId, @PathVariable(value="topicId") long topicId) {
-//		Optional <User> user = userRepository.findById(userId);
-//		Optional <Topic> topic = topicRepository.findById(topicId);
-//		User u = null;
-//		Topic t = null;
-//		if(user.isPresent()) {
-//			user.get();
-//			
-//		}
-		likeRepository.deleteByUserAndTopic(topicId, userId);
-		
-		
-		
-		return null;
+	public @ResponseBody String deleteLikebyId(@PathVariable(value="userId") long userId, @PathVariable(value="topicId") long topicId) {
+		Likes l = likeRepository.findByUserIdAndTopicId(userId, topicId);
+		likeRepository.delete(l);
+		return "deleted";
 	}
 	
+	////////////////////////////////////////////////
+	
+	@GetMapping(path="{userId}/getuserlike/{topicId}")
+	public @ResponseBody Likes findLikebyId(@PathVariable(value="userId") long userId, @PathVariable(value="topicId") long topicId) {
+		Likes l = likeRepository.findByUserIdAndTopicId(userId, topicId);	
+		
+		return l;
+	}
 	
 }

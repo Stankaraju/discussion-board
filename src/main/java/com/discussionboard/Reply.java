@@ -30,6 +30,7 @@ public class Reply {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
+	@Column(length = 4000)
 	private String replyText;
 	private String commentedBy;
 	
@@ -50,7 +51,7 @@ public class Reply {
 	private Topic topic;
 
 	
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 	public void setId(Long id) {

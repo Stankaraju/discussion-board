@@ -33,7 +33,7 @@ import com.discussionboard.repositories.TopicRepository;
 import com.discussionboard.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin
 @RestController
 @RequestMapping(path="api/topic")
 public class MainController {
@@ -222,8 +222,8 @@ public class MainController {
 				return replies;
 			}	
 			
-			
-			@PutMapping(path="/updateReply")
+			// update reply
+			@PostMapping(path="/updateReply")
 			public @ResponseBody Reply updateReply(@RequestBody Reply r) {
 				Optional<Reply> reply = replyRepository.findById(r.getId());
 				if(reply.isPresent()) {
@@ -236,8 +236,27 @@ public class MainController {
 				
 				return replyRepository.save(reply.get());
 			}
-			
-			
+//			
+//			//update reply by topic 
+//			@PostMapping(path="updatereply/{topicId}")
+//			public @ResponseBody Reply updateReplyByTopic(@PathVariable(value="topicId") long topicId, @RequestBody Reply r) {
+//				Optional<Topic> t = topicRepository.findById(topicId);
+//				Optional<Reply> reply = replyRepository.findById(r.getId());
+//				Reply r2 = null;
+//				if(t.isPresent()) {
+//				List<Reply> rep = t.get().getReplies();
+//				
+//				for(Reply r1: rep) {
+//					if(r1.getId() == r.getId()) {
+//						r2 = r1;
+//						
+//					}					
+//				  }				
+//				}		
+//				return r2;
+//			}
+//			
+//			
 			@PostMapping (path= "{userId}/getTopics")
 			public @ResponseBody List<Topic> getAllTopicsByUser(@PathVariable(value="userId") long userId) {
 				Optional<User> u = userRepository.findById(userId);

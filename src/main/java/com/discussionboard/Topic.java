@@ -35,6 +35,7 @@ public class Topic {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	private String tName;
+	@Column(length = 4000)
 	private String tdescription;
 	private String createdBy;
   // **** relation to replies ****//

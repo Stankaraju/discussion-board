@@ -51,7 +51,8 @@ public class MvcConfig extends WebSecurityConfigurerAdapter {
 		.authorizeRequests()
 	
 		.antMatchers("/user/register","/user/login","/logout","/api/topic/**","/post","/documentupload","/getdocuments/**",
-				"/getAllDocuments","/download-document/**","/docuupload/**","/getdocbytopicId/**").permitAll()
+				"/getAllDocuments","/download-document/**","/docuupload/**",
+				"/getdocbytopicId/**","/sendMail").permitAll()
 		
 		.anyRequest().fullyAuthenticated().and()
 //		.formLogin().loginPage("/user/login").and()
